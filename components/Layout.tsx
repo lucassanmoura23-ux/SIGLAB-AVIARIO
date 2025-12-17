@@ -42,7 +42,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView }
   const [logoError, setLogoError] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex flex-col md:flex-row min-h-[100dvh] bg-gray-100">
       {/* Sidebar - Desktop */}
       <aside className="hidden md:flex flex-col w-56 bg-white border-r border-gray-200 fixed h-full z-10 shadow-lg">
         <div className="p-2 border-b border-gray-100 flex flex-col items-center text-center bg-white">
@@ -159,12 +159,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentView, setView }
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 md:ml-56 p-3 md:p-6 pt-16 md:pt-4 overflow-x-hidden min-h-screen bg-gray-50">
+      <main className="flex-1 md:ml-56 p-3 md:p-6 pt-16 md:pt-4 overflow-x-hidden w-full bg-gray-50 pb-24 md:pb-6">
         {children}
       </main>
 
       {/* Mobile Bottom Nav */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-1 z-20 shadow-[0_-1px_3px_rgba(0,0,0,0.1)] pb-2">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around p-1 z-20 shadow-[0_-1px_3px_rgba(0,0,0,0.1)] pb-safe-or-2">
          <button onClick={() => setView(ViewState.DASHBOARD_GENERAL)} className={`p-2 rounded flex flex-col items-center ${currentView === ViewState.DASHBOARD_GENERAL ? 'text-blue-600' : 'text-gray-400'}`}>
             <LayoutDashboard size={18}/>
             <span className="text-[9px] mt-0.5">Geral</span>

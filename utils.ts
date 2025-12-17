@@ -1,4 +1,3 @@
-
 import { EggRecord, ComputedRecord, AviaryId, FilterState, CharacterizationRecord, FeatheringQuality } from './types';
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -613,7 +612,7 @@ export const exportToPDF = (records: ComputedRecord[], filter: FilterState) => {
   });
 
   // Footer
-  const pageCount = doc.internal.getNumberOfPages();
+  const pageCount = doc.getNumberOfPages();
   for(let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(8);
@@ -663,7 +662,7 @@ export const exportAISummaryToPDF = (summary: string, filter: FilterState) => {
   doc.text(splitText, 14, 46);
 
   // Footer
-  const pageCount = doc.internal.getNumberOfPages();
+  const pageCount = doc.getNumberOfPages();
   for(let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(8);

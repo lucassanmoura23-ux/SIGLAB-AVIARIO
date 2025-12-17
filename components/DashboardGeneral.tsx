@@ -1,12 +1,12 @@
 
 import React, { useMemo } from 'react';
-import { ComputedRecord, AviaryId, FilterState, CharacterizationRecord } from '../types';
-import { Egg, TrendingUp, Bird, AlertTriangle, Scale, Weight, Download } from 'lucide-react';
+import { ComputedRecord, FilterState, CharacterizationRecord } from '../types';
+import { Egg, TrendingUp, Bird, AlertTriangle, Scale, Weight, Download, LucideIcon } from 'lucide-react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
   PieChart, Pie, Cell 
 } from 'recharts';
-import { formatDateBr, exportToPDF, formatMonthBr } from '../utils';
+import { exportToPDF, formatMonthBr } from '../utils';
 
 interface DashboardProps {
   records: ComputedRecord[];
@@ -14,8 +14,16 @@ interface DashboardProps {
   charRecords?: CharacterizationRecord[]; // Optional prop to calculate age
 }
 
-const StatCard = ({ label, value, icon: Icon, colorClass, subtext }: any) => (
-  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-start space-x-4">
+interface StatCardProps {
+  label: string;
+  value: string | number;
+  icon: LucideIcon;
+  colorClass: string;
+  subtext?: string;
+}
+
+const StatCard: React.FC<StatCardProps> = ({ label, value, icon: Icon, colorClass, subtext }) => (
+  <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-start space-x-4 transition-all hover:shadow-md">
     <div className={`p-3 rounded-lg ${colorClass} bg-opacity-10 text-opacity-100`}>
       <Icon className={colorClass.replace('bg-', 'text-')} size={28} />
     </div>
@@ -27,8 +35,20 @@ const StatCard = ({ label, value, icon: Icon, colorClass, subtext }: any) => (
   </div>
 );
 
-const QualityCard = ({ label, value, percentage, colorClass }: any) => (
-  <div className={`p-4 rounded-xl border ${colorClass.border} bg-white shadow-sm flex flex-col items-center justify-center`}>
+interface QualityCardProps {
+  label: string;
+  value: number;
+  percentage: string | number;
+  colorClass: {
+    border: string;
+    textLabel: string;
+    textValue: string;
+    textPerc: string;
+  };
+}
+
+const QualityCard: React.FC<QualityCardProps> = ({ label, value, percentage, colorClass }) => (
+  <div className={`p-4 rounded-xl border ${colorClass.border} bg-white shadow-sm flex flex-col items-center justify-center hover:bg-gray-50 transition-colors`}>
     <span className={`text-sm font-medium ${colorClass.textLabel}`}>{label}</span>
     <span className={`text-2xl font-bold ${colorClass.textValue}`}>{value.toLocaleString()}</span>
     <span className={`text-sm font-semibold ${colorClass.textPerc}`}>{percentage}%</span>
@@ -139,7 +159,6 @@ export const DashboardGeneral: React.FC<DashboardProps> = ({ records, filter, ch
             const entry = batchCurveDataMap.get(currentAge);
             
             // Average the rate if multiple records for same age/batch (e.g. daily records)
-            // But we want lines per BatchId.
             // Structure: { age: 25, 'Lote A': 90, 'Lote B': 85 }
             
             if (!entry[r.batchId!]) {
@@ -197,7 +216,7 @@ export const DashboardGeneral: React.FC<DashboardProps> = ({ records, filter, ch
   }, [records, charRecords]);
 
   if (!stats) {
-    return <div className="p-8 text-center text-gray-500">Sem dados para os filtros selecionados.</div>;
+    return <div className="p-12 text-center text-gray-500 bg-white rounded-lg shadow-sm border border-gray-200">Sem dados para os filtros selecionados. Adicione novos registros.</div>;
   }
 
   // Predefined colors for batches
@@ -235,7 +254,7 @@ export const DashboardGeneral: React.FC<DashboardProps> = ({ records, filter, ch
           value={stats.totalBirds.toLocaleString()} 
           icon={Bird} 
           colorClass="bg-purple-600" 
-          subtext="(atual)"
+          subtext="(saldo atual)"
         />
         <StatCard 
           label="Mortalidade" 
@@ -261,10 +280,10 @@ export const DashboardGeneral: React.FC<DashboardProps> = ({ records, filter, ch
         />
       </div>
 
-      {/* 2. QUALITY SECTION (Primeiro Gráfico) */}
-      <div className="bg-white p-6 rounded-xl shadow-sm">
+      {/* 2. QUALITY SECTION */}
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h3 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-            <span className="bg-blue-100 text-blue-700 p-1 rounded text-sm">1</span>
+            <span className="bg-blue-100 text-blue-700 w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold">1</span>
             Qualidade dos Ovos
         </h3>
         <div className="flex flex-col lg:flex-row gap-8 items-center">
@@ -324,21 +343,22 @@ export const DashboardGeneral: React.FC<DashboardProps> = ({ records, filter, ch
         </div>
       </div>
 
-      {/* 3. PRODUCTION RATE CHART (Segundo Gráfico) */}
-      <div className="bg-white p-6 rounded-xl shadow-sm">
+      {/* 3. PRODUCTION RATE CHART */}
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <span className="bg-blue-100 text-blue-700 p-1 rounded text-sm">2</span>
+            <span className="bg-blue-100 text-blue-700 w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold">2</span>
             Desempenho Produtivo (Mensal)
         </h3>
         <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
             <LineChart data={stats.chartData}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="date" />
-            <YAxis />
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+            <XAxis dataKey="date" tick={{fontSize: 12}} />
+            <YAxis tick={{fontSize: 12}} />
             <Tooltip 
                 formatter={(value: number) => value.toLocaleString()}
                 labelFormatter={(label) => `Período: ${label}`}
+                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
             />
             <Legend />
             <Line type="monotone" dataKey="Produção" stroke="#2563eb" strokeWidth={3} dot={{r: 4}} activeDot={{r: 6}} />
@@ -347,30 +367,33 @@ export const DashboardGeneral: React.FC<DashboardProps> = ({ records, filter, ch
         </div>
       </div>
 
-      {/* 4. BATCH CURVE (Terceiro Gráfico) */}
-      <div className="bg-white p-6 rounded-xl shadow-sm">
+      {/* 4. BATCH CURVE */}
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h3 className="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2">
-            <span className="bg-blue-100 text-blue-700 p-1 rounded text-sm">3</span>
+            <span className="bg-blue-100 text-blue-700 w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold">3</span>
             Curva de Maturidade do Lote (Postura x Idade)
         </h3>
-        <p className="text-xs text-gray-500 mb-4 ml-7">Comparativo de desempenho entre lotes baseado na idade semanal das aves.</p>
+        <p className="text-xs text-gray-500 mb-4 ml-8">Comparativo de desempenho entre lotes baseado na idade semanal das aves.</p>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={stats.batchCurveData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
               <XAxis 
                 dataKey="age" 
                 type="number" 
                 domain={['auto', 'auto']} 
-                label={{ value: 'Idade (Semanas)', position: 'insideBottom', offset: -5 }} 
+                label={{ value: 'Idade (Semanas)', position: 'insideBottom', offset: -5, fontSize: 12 }} 
+                tick={{fontSize: 12}}
               />
               <YAxis 
                 domain={[0, 100]} 
-                label={{ value: 'Postura (%)', angle: -90, position: 'insideLeft' }} 
+                label={{ value: 'Postura (%)', angle: -90, position: 'insideLeft', fontSize: 12 }} 
+                tick={{fontSize: 12}}
               />
               <Tooltip 
                  formatter={(value: number) => value.toFixed(1) + '%'}
                  labelFormatter={(label) => `${label} Semanas`}
+                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
               />
               <Legend verticalAlign="top" height={36}/>
               {stats.batchIds.map((batchId, index) => (
